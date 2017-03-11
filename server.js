@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const session = require('express-session');
+const sessionTurn = require('express-session');
 const port = 3000;
 
 const app = express();
@@ -17,18 +17,23 @@ const logger = function(req, res, next){
   next();
 };
 
-const cart = []
-
 app.use(bodyParser.json())
-app.use(session({
+app.use(sessionTurn({
   secret: 'aefafojaefojfoij88oj',
   saveUnitialized: true,
   resave: true
 }));
 
 app.post('/cart', (req, res, next) => {
-  if(!req.session){
+  if(!req.session.cart){
     req.session.cart = []
   }
-  req.session.cart.push(req)
-})
+  req.session.cart.push(req.body);
+  next();
+}, logger, function(req, res, next){
+  res.status(200).send({"cart": req.session.cart});
+});
+
+app.get('/cart', (req, res, next) => {
+  res.status(200).send(req.session.cart);
+});
